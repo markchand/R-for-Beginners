@@ -1,6 +1,6 @@
 ---
 title: "A Brief Intro to R, RMarkdown and RStudio"
-author: "Mark Hand" 
+author: "Mark C. Hand" 
 date: February 2019 
 output: html_document
 ---

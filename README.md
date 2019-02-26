@@ -6,4 +6,4 @@ Here's how to begin this (very) short R for Beginners tutorial:
 - Download R https://www.r-project.org/ 
 - Download RStudio https://www.rstudio.com/products/rstudio/download/ 
 
-Now open up the file `R-Lab-1-Introduction.Rmd` and navigate to line 10. 👋
+Now from the file you just downloaded, open up `R-Lab-1-Introduction.Rmd` in RStudio and navigate to line 10. 👋
