@@ -6,4 +6,4 @@ Welcome! Here's how to begin:
 - Download R https://www.r-project.org/ 
 - Download RStudio https://www.rstudio.com/products/rstudio/download/ 
 
-Now open up the file "R-Lab-1-Introduction.Rmd" and navigate to line 11. 👋
+Now open up the file `R-Lab-1-Introduction.Rmd` and navigate to line 10. 👋
