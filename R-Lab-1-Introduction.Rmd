@@ -1,0 +1,152 @@
+---
+title: "A Brief Intro to R, RMarkdown and RStudio"
+author: "Mark Hand" 
+date: February 2019 
+output: html_document
+---
+
+# Welcome! 
+
+You're looking at something called an RMarkdown document. This kind of document lets you produce multiple outputs. This one is set to produce a presentation. Your first task: Look for the "Knit" button above, and press it--your machine should do some whirring and clicking, and then produce a file called "R-Lab-1-Visualization.html", which should now be located in the same folder on your machine as this .Rmd file. If it didn't, text me at 318-52(ate)-7727. 
+
+An RMarkdown document has three major parts: 
+
+- The header information (sometimes called the YAML; see lines 1-7)
+- Text (like this)
+- Code chunks (example coming up next on line 17) 
+
+```{r setup, include=FALSE}
+# This is an R code chunk. This particular code chunk only has one line of actual code, which sets some formatting rules for the rest of the document. Don't worry yet about what this code means. 
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+# BTW: When you put a # at the beginning of a line inside of a code chunk, that's called "commenting out." It won't show up in whatever you knit.
+```
+
+# RMarkdown, RStudio and R 
+
+There are a bunch of things happening all at once here. Can you find the following? 
+
+- "R Markdown" under File > Create New 
+- The "Files" tab
+- The "Console" tab"
+- The "Environment" tab 
+- "R" under the Insert button 
+
+These are some of the more important features of **RStudio**, which is the interface you're looking at presently. It's just one way (probably the easiest way) to use R. 
+
+**R** is a language. When you downloaded R, you told your computer "Hey, learn this langauge. I'll learn it too, and then we can talk to each other." R, like Python, is a special kind of language: It's **open source**, which means that people are adding to it all the time. They often add to it by adding **packages**, which are basically sets of pre-set functions that let us do fun things that basic R can't do, like make import certain document types or scrape tweets. Rmarkdown is a sort of package that lets us create pretty documents.  
+  
+# R basics 
+
+R lets you do lots of stuff. At its most basic, it is a fancy, fragile calculator. In this chunk, we'll create a vector called "Jasleen" that contains two numbers; then we'll multiply it by two. Then we'll create another vector called "Mark" that's made up of the numbers 1-100. Look in the _Environment_ tab to see where those are, at the _Console_ tab to see how RStudio interpreted what you did, and at the _History_ tab to see a record of what you input. 
+
+## Creating objects and calculating
+
+```{r calculating}
+jasleen <- c(2,3)
+jasleen*2
+mark <- (1:100)
+```
+
+Mess around with those vectors and functions to see what you can build (or break).
+
+## Writing functions
+
+Next, we'll create a function we will, for no real reason, call _powrr_. 
+
+```{r functions}
+powrr <- function(x, y) {
+result <- x^y
+print(paste(x,"raised to the power of", y, "is", result))}
+
+powrr(4,6)
+```
+
+---
+# Source: https://www.datamentor.io/r-programming/function/
+---
+
+That function prints "x raised to the power y." Replace the numbers _4_ and _6_ with other numbers and watch what happens. Note: If you want to run just one line of code, highlight that line and hit `Command` + `enter.` 
+
+## Writing loops 
+
+Loops are another way of running the same operation on multiple items: 
+
+```{r loops, eval=F}
+x <- 1:10
+n <- length(x)
+x2 <- numeric(0)
+
+for (i in 1:n){
+  x2[i] <- x[i]^2
+   print(x2)
+}
+```
+
+## Installing and using packages 
+
+R is a big language; when you want to do something that basic R doesn't let you do, you have to install or call a package: 
+
+```{r library}
+library(tidyverse)
+```
+
+An important note: If you got an error here, that might be due to the fact that before you call a package, you have to install it with this command: 
+
+
+```{r packages, eval=FALSE}
+install.package("tidyverse")
+```
+
+You only have to do that once on your machine; after that, you can use the `library()` command. 
+
+## Importing data 
+
+Importing data usually looks like this: 
+```{r importing data, eval=FALSE}
+mtcars <- read_csv("data/mtcars.csv")
+```
+
+... and you can do that manually or--if your dataset is located in your files--click on the dataset in Files and choose _Import_. 
+
+For now, we'll simply use a dataset called `mtcars` that is already loaded along with the _tidyverse_. 
+
+## Examining data
+
+There are lots of ways to take a look at your data: 
+
+```{r examining}
+# View(mtcars)
+# str(mtcars)
+# summary(mtcars)
+head(mtcars)
+```
+
+Note that we have used `#` to comment out some of the commands in the chunk above. 
+
+## Error messages 
+
+Something like 95% of coding is fixing errors in your code. What to do: 
+
+- Copy the error into Google
+- run the help command on the function (e.g. `?ggplot2`)
+- Look on www.stackexchange.com
+- Ask on twitter with the hashtag #rstats
+- Order another beer 
+
+## Formulas
+
+RMarkdown lets you include formulas in your document. Here's what that looks like:
+
+$Y = f(X_{1}) + \epsilon$
+
+See [here](https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html) for a cheat sheet. 
+
+## Images
+
+Here's how to include images!
+
+![](collateral/coco.jpg) 
+
+Next up: Check out `R-Lab-2-Visualization.Rmd`. 

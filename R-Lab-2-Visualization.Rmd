@@ -1,0 +1,271 @@
+---
+title: "Data Visualization in R with Tidyverse"
+author: "By Mark C. Hand" 
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# This is a chunk we have called "setup." Above this is YAML, the document's metadata. Together, they determine how the rest of the document looks. You can read about knitr code chunk options here:
+# https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+# When you add a new chunk, give it a name. 
+
+# The rest of this tutorial assumes you have installed R and RStudio; if you haven't, or if you're looking at this in something other than RStudio, go do that first and come on back. 
+```
+
+## First things first: 
+
+![](http://flowingdata.com/wp-content/uploads/2012/06/label-your-axes.png)
+
+...unless you can get away with it. 
+
+
+Welcome to Data Visualization in R! We'll be using a dataset from the Pew Research Center's [Forum on Religion & Public Life](http://www.pewforum.org/), a country-wide survey from 2014 Americans' religious beliefs. You can download the data [from Pew](http://www.pewforum.org/datasets/) or my [GitHub page](https://github.com/markchand/Religion-in-America) (sorry Pew!). 
+
+## Importing data
+Importing data looks like this: 
+
+```{r import}
+library(haven)
+pew <- read_sav("data/Dataset - Pew Research Center 2014 Religious Landscape Study National Telephone Survey - Version 1.1 - December 1 2016.sav")
+```
+
+---
+# A quick note on packages: library(haven) is a package that helps us import files with a .sav extension. In general, if you have not used a package before, you'll have to first install it on your machine using the command structure install.packages("haven"). After that, you'll call that package into a project using the structure library("haven").
+
+A quick note on my quick note: Notice that if you use ---  it will comment out text in a markdown document, the same way that adding "#" will do it in a chunk. Don't forget these symbols at the end:
+---
+
+To visualize this data we will be using a package called ggplot2, which is included in a package of packages called *tidyverse*:
+
+```{r tidy, results='hide', error=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+## A roadmap for today (and some conceptual stuff) 
+
+While we're all getting set up, here's a roadmap for the afternoon:  
+
+* R and plot() versus tidyverse and ggplot2 
+* ggplot and the grammar of graphics
+* Principles of pretty visualizations 
+* Getting data into shape with dplyr  
+* Using ggplot to examine your data 
+
+## Getting to know your data 
+
+The Pew data comes with a codebook from which we'll pick out a few variables to work with. If you want to see some information about the variables at once, you *could* do some of these things: 
+
+```{r head, eval=FALSE}
+summary(pew)
+pairs(pew)
+corr(pew)
+```
+
+... but you don't want to do any of those things in a dataset with this many variables. You can check out the names and basic structure of a dataset with `str()`. 
+
+```{r str, eval=FALSE}
+str(pew)
+# A quick note here: eval=FALSE will prevent the code chunk from providing any output into your markdown document. 
+```
+
+## Charts and things 
+
+Let's start with the basics: a histogram of religious affiliation, the simplest version of this is the variable "RELTRAD." 
+
+```{r bars}
+ggplot(pew, aes(RELTRAD)) + geom_bar()
+```
+
+That didn't work! Why not? This a pretty normal mistake that I regularly make: The data I want to use is stored as integers rather than text (characters), and different `geoms` require different kinds of data. If we look at the data in the codebook, we also see that the data is in a format unhelpful to our visualization. We need to use the codebook to transform the data into something useful, using the `mutate` and `case_when` commands from dplyr, another package in the tidyverse. 
+
+```{r mutate}
+pew %>% 
+  mutate(
+    RELTRAD2 = case_when(
+  RELTRAD == 1100 ~ "Evangelical Protestant Tradition", 
+  RELTRAD == 1200 ~ "Mainline Protestant Tradition",
+  RELTRAD == 1300 ~ "Historically Black Protestant Tradition", 
+  RELTRAD == 10000 ~ "Catholic",
+  RELTRAD == 20000 ~ "Mormon",
+  RELTRAD == 30000 ~ "Orthodox Christian",
+  RELTRAD == 40001 ~ "Jehovah's Witness",
+  RELTRAD == 40002 ~ "Other Christian",
+  RELTRAD == 50000 ~ "Jewish",
+  RELTRAD == 60000 ~ "Muslim",
+  RELTRAD == 70000 ~ "Buddhist", 
+  RELTRAD == 80000 ~ "Hindu",
+  RELTRAD == 90001 ~ "Other World Religions",
+  RELTRAD == 90002 ~ "Other Faiths",
+  RELTRAD == 100000 ~ "Unaffiliated (religious 'nones')",
+  RELTRAD == 900000 ~ "Don't know/refused - no information on religious identity")) -> pew
+```
+
+```{r bars take two}
+ggplot(pew, aes(RELTRAD2)) + geom_bar()
+```
+
+That's still pretty terrible looking. We want to do something like this:
+
+![](https://i.imgur.com/WntrM6p.gif)
+
+
+Let's clean our plot up with code options from ggplot. Run the code below in stages: After `geom_bar()`, highlight one additional row every time you rune the code to watch what happens. 
+
+```{r bars cleaning up}
+ggplot(pew, aes(x = fct_infreq(RELTRAD2))) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  labs(y="Number of Respondents", x="") + 
+  ggtitle( "Prevalence of Religions in the United States", subtitle = "Source: Pew Religion Survey, 2014") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+Better! Let's try another one. We know now that we'll need to do some mutating in order to take a look at the relationship between age and ideology in the survey: 
+
+```{r more mutating}
+pew %>% 
+  mutate(
+    agerec2 = case_when(
+  agerec == 1 ~ "Age 24 or younger",
+  agerec == 2 ~ "Age 25-29",
+  agerec == 3 ~ "30-34",
+  agerec == 4 ~ "35-39",
+  agerec == 5 ~ "40-44",
+  agerec == 6 ~ "45-49",
+  agerec == 7 ~ "50-54",
+  agerec == 8 ~ "55-59",
+  agerec == 9 ~ "60-64",
+  agerec == 10 ~ "65-69",
+  agerec == 11 ~ "70-74",
+  agerec == 12 ~ "75-79",
+  agerec == 13 ~ "80-84",
+  agerec == 14 ~ "85-89",
+  agerec == 15 ~ "Age 90 or older",
+  agerec == 99 ~ "NA")
+  ) -> pew
+```
+
+```{r age}
+ggplot(pew, aes(agerec2)) + geom_bar()
+```
+
+Not cool. Let's clean things up a bit and plot again: 
+
+```{r ugh fine}
+pew %>% 
+  mutate(
+    agerec2 = case_when(
+  agerec == 1 ~ "24 or younger",
+  agerec == 2 ~ "25-29",
+  agerec == 3 ~ "30-34",
+  agerec == 4 ~ "35-39",
+  agerec == 5 ~ "40-44",
+  agerec == 6 ~ "45-49",
+  agerec == 7 ~ "50-54",
+  agerec == 8 ~ "55-59",
+  agerec == 9 ~ "60-64",
+  agerec == 10 ~ "65-69",
+  agerec == 11 ~ "70-74",
+  agerec == 12 ~ "75-79",
+  agerec == 13 ~ "80-84",
+  agerec == 14 ~ "85-89",
+  agerec == 15 ~ "90 or older",
+  agerec == 99 ~ "NA"),
+    ideo2 = case_when(
+  ideo == 1 ~ "1 - Very conservative",
+    ideo == 2 ~ "2 - Conservative",
+    ideo == 3 ~ "3 - Moderate",
+    ideo == 4 ~ "4 - Liberal",
+    ideo == 5 ~ "5 - Very liberal",
+    ideo == 9 ~ "NA")) -> pew
+```
+
+```{r age take two}
+ggplot(subset(pew, agerec2!="NA" & ideo2!="NA"), aes(agerec2, fill = ideo2)) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  labs(y="Number of Respondents", x="Age Group", fill="Ideology") + 
+  ggtitle( "Ideological Identification by Age", subtitle = "Source: Pew Religion Survey, 2014") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  scale_fill_manual(breaks = c("1 - Very conservative", "2 - Conservative", "3 - Moderate","4 - Liberal","5 - Very liberal"), values=c("red","dark red","purple4","dark blue","blue"))
+```
+
+Now we're getting somewhere! 
+
+## Animated graphics with ggplot and gganimate 
+
+Now, just for kicks: When I'm well-caffeinated, I always take a first stab at *one* thing that I'd like to learn how to do but don't understand yet. This time I wanted to try gganimate: 
+
+```{r animating fails, include=FALSE, eval=FALSE}
+library(gganimate)
+p <- ggplot(subset(pew, agerec2!="NA" & ideo2!="NA"), aes(ideo2)) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(y="Number of Respondents", x="") + 
+  ggtitle( "Americans' Ideology by Age", subtitle = "Source: Pew Religion Survey, 2014")
+
+p + transition_time(agerec2) +
+  labs(title = "Age Group: {frame_time}")
+  
+install.packages("gifski")
+library(gifski)
+  
+p + transition_time(agerec2) +
+  labs(title = "Age Group: {frame_time}")   
+
+install.packages("png")
+library(png)  
+
+p + transition_states(agerec2)
+```
+
+```{r gganimate, warning=FALSE}
+library(gganimate) # for animation
+library(gifski) # Because the warning messages said so
+library(png) # See above
+library(magick) # for exporting animations  
+
+p <- ggplot(subset(pew, agerec2!="NA" & ideo2!="NA"), aes(ideo2, fill = ideo2)) + 
+  geom_bar() + 
+  coord_flip() + 
+  theme_minimal() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(y="Number of Respondents", x="") + 
+  ggtitle( "Political Identification by Age", subtitle = "Source: Pew Religion Survey, 2014")  +
+  scale_fill_manual(breaks = c("1 - Very conservative", "2 - Conservative", "3 - Moderate","4 - Liberal","5 - Very liberal"), values=c("red","dark red","purple4","dark blue","blue")) + theme(legend.position="none")
+
+p + transition_states(agerec2) +
+  labs(title = "Americans' Ideology by Age: {closest_state}") 
+```
+
+```{r exporting for twitter, include = FALSE}
+anim <- p + transition_states(agerec2) +
+  labs(title = "Americans' Ideology by Age: {closest_state}") 
+
+anim_save("collateral/ideology.gif", anim)
+```
+
+
+## Some other (R)esouces
+
+More on ggplot and tidyverse:
+
+* [DataCamp/Data Visualization with ggplot2 (part 2).Rmd](https://github.com/jpwalker625/DataCamp/blob/master/Data%20Visualization%20with%20ggplot2%20(part%202).Rmd)
+* [Interactive visualizations with R - a minireview](http://ouzor.github.io/blog/2014/11/21/interactive-visualizations.html)
+* [Data visualization with ggplot2](https://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html)
+
+Just **some** of the things I had to search for:  
+
+* [Data Wrangling Part 2: Transforming your columns into the right shape](https://suzan.rbind.io/2018/02/dplyr-tutorial-2/)
+* [R for Data Science](https://r4ds.had.co.nz)
+* [R Color Cheatsheet](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf)
+* [ggplot2 colors : How to change colors automatically and manually?](http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually)
+* [Help needed with simple animation](https://github.com/thomasp85/gganimate/issues/94)
+
+As usual, a massive thanks to [Matt Worthington](https://www.linkedin.com/in/mattworthington) for all his help. 
+
