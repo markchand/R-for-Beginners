@@ -1,6 +1,6 @@
-# R-for-Beginners
+# Welcome!
 
-Welcome! Here's how to begin: 
+Here's how to begin this (very) short R for Beginners tutorial: 
 
 - In the top right-hand corner, you'll see a green "Clone or Download" button. Go ahead and download the .zip file to your desktop and unzip it. 
 - Download R https://www.r-project.org/ 
